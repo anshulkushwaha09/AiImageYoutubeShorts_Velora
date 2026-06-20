@@ -40,8 +40,8 @@ async def main():
                 thumbnail = os.path.join(output_path, "full", "thumbnail.jpg")
                 
                 if os.path.exists(full_video):
-                    title = f"{topic} - Cinematic AI Story #shorts"
-                    desc = f"Learn about {topic} in this cinematic AI generated story!\n\nGenerated autonomously by Alreetal AI Engine."
+                    title = f"{topic} | Untold Mystery Explained! 😲🔥 #shorts"
+                    desc = f"Dive deep into the shocking truth about {topic}! 🤯 Watch this cinematic AI-generated story to uncover ancient mysteries and hidden secrets.\n\n🔔 Subscribe for more mind-blowing mythological stories and facts!\n\n#Mythology #History #AI #SanatanDharma #AncientIndia #Trending #Shorts"
                     uploader.upload_video(full_video, thumbnail, title, desc)
                 else:
                     print("   [Upload Warning] Full video not found for upload.")

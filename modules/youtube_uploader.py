@@ -56,7 +56,7 @@ class YouTubeUploader:
                 'categoryId': '27' # Education
             },
             'status': {
-                'privacyStatus': 'private', # Default to private for safety
+                'privacyStatus': 'public', # Make video public
                 'selfDeclaredMadeForKids': False
             }
         }
