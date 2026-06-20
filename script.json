@@ -1,0 +1,66 @@
+[
+    {
+        "id": 1,
+        "narration": "Kya aap jaante ho, history ka sabse powerful weapon kaunsa tha? Socho, aisa weapon jo sab kuch khatam kar de!",
+        "english_caption": "Do you know, what was the most powerful weapon in history? Imagine, a weapon that can destroy everything!",
+        "image_prompt": "sitting in a dimly lit ancient library, surrounded by towering stacks of scrolls, illuminated by a single flickering oil lamp, deep in thought, a sense of ancient mystery",
+        "duration": 3.0,
+        "type": "hook"
+    },
+    {
+        "id": 2,
+        "narration": "Nahi, nuclear bomb nahi. Main baat kar raha hoon us divine weapon ki, jise kehte hain Brahmastra! Naam suna hai?",
+        "english_caption": "No, not a nuclear bomb. I'm talking about that divine weapon, called Brahmastra! Heard of it?",
+        "image_prompt": "looking intently at an glowing ancient diagram of a celestial weapon etched on a stone tablet, intricate carvings shimmering softly",
+        "duration": 3.0,
+        "type": "hook"
+    },
+    {
+        "id": 3,
+        "narration": "Imagine a weapon, jo khud Brahma Dev ne banaya ho. Uski shakti, uski destructive power, soch bhi nahi sakte!",
+        "english_caption": "Imagine a weapon, created by Lord Brahma himself. Its power, its destructive power, unimaginable!",
+        "image_prompt": "standing before a cosmic vortex of energy, ethereal blue and gold light swirling around, an abstract representation of divine creation, awe-inspiring",
+        "duration": 3.0,
+        "type": "build"
+    },
+    {
+        "id": 4,
+        "narration": "Ye itna powerful hai ki, ek baar release ho gaya toh, puri srishti ko pal bhar mein raakh kar sakta hai.",
+        "english_caption": "It's so powerful that, once released, it can reduce the entire creation to ashes in an instant.",
+        "image_prompt": "looking out over a desolate, burning landscape, smoke rising from a massive crater, a single untouched flower blooming amidst the destruction, eerie silence",
+        "duration": 3.0,
+        "type": "build"
+    },
+    {
+        "id": 5,
+        "narration": "Pura universe, grah, nakshatra... sab kuch khatam! Iske saamne atom bomb bhi chhota lagta hai.",
+        "english_caption": "The entire universe, planets, stars... everything destroyed! Even an atom bomb looks small in front of it.",
+        "image_prompt": "holding a small, intensely glowing miniature representation of the Brahmastra, looking at it with a mix of awe and profound fear, cosmic dust swirling around their hand",
+        "duration": 3.0,
+        "type": "build"
+    },
+    {
+        "id": 6,
+        "narration": "Lekin 'Did you know?' isko sirf 'mantra' se summon nahi karte the, isse wapas bhi bulaya ja sakta tha! Jab tak sahi haathon mein ho.",
+        "english_caption": "But 'Did you know?' it wasn't just summoned by a 'mantra', it could also be recalled! As long as it was in the right hands.",
+        "image_prompt": "gesturing with one hand, as if performing an ancient ritual, a faint golden light emanating from their palm, eyes focused on an unseen ethereal target, concentration",
+        "duration": 3.0,
+        "type": "twist"
+    },
+    {
+        "id": 7,
+        "narration": "Mahabharat mein Ashwathama ne jab iska use kiya, toh Lord Krishna ko khud intervene karna pada tha, uski destructive power ko control karne ke liye!",
+        "english_caption": "In Mahabharat, when Ashwathama used it, Lord Krishna himself had to intervene to control its destructive power!",
+        "image_prompt": "a powerful golden beam of energy shooting towards the sky from an ancient battlefield, dark stormy clouds gathering, a sense of immense uncontrollable power being unleashed, dramatic",
+        "duration": 3.0,
+        "type": "climax"
+    },
+    {
+        "id": 8,
+        "narration": "Socho, agar ye ultimate weapon aaj ke zamane mein kisi galat haath mein aa jaye toh kya hoga? Kya humari duniya survive kar paegi?",
+        "english_caption": "Imagine, if this ultimate weapon falls into the wrong hands in today's time, what will happen? Will our world be able to survive?",
+        "image_prompt": "standing on a futuristic rooftop overlooking a sprawling modern city at night, looking concerned at the distant horizon, a subtle glitch effect on the city lights, dystopian feel",
+        "duration": 3.0,
+        "type": "cliffhanger"
+    }
+]

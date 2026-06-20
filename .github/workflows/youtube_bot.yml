@@ -1,0 +1,40 @@
+name: YouTube Video Generator Bot
+
+on:
+  schedule:
+    # Run at 7:00 AM and 7:00 PM (UTC)
+    - cron: '0 7,19 * * *'
+  workflow_dispatch: # Allows manual triggering from the GitHub UI
+
+jobs:
+  generate_and_upload:
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v3
+
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.12'
+
+      - name: Install System Dependencies (FFmpeg & ImageMagick)
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y ffmpeg imagemagick
+
+      - name: Install Python Dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+
+      - name: Run Pipeline and Upload
+        env:
+          GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          YOUTUBE_OAUTH_TOKEN: ${{ secrets.YOUTUBE_OAUTH_TOKEN }}
+        run: |
+          # The --upload flag tells main.py to upload to YouTube
+          python main.py --upload

@@ -1,0 +1,11 @@
+google-generativeai
+edge-tts
+moviepy
+requests
+ffmpeg-python
+python-dotenv
+Pillow
+huggingface_hub
+google-api-python-client
+google-auth-oauthlib
+google-auth-httplib2
