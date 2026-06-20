@@ -239,20 +239,24 @@ class ContentBrain:
             if not raw_text:
                 print("   [Brain Error] Dual script generation failed: No response from Gemini. Falling back to pre-defined script.")
                 fallback = _get_fallback_script()
-                return fallback, fallback
+                return fallback, fallback, "The Heroic Sacrifice of Abhimanyu"
             
             # Simple cleaning for common JSON output errors
             clean_text = raw_text.strip().replace("```json", "").replace("```", "")
             data = json.loads(clean_text)
-            return data.get("short", []), data.get("full", [])
+            return data.get("short", []), data.get("full", []), topic
         except Exception as e:
             print(f"   [Brain Error] Dual script generation failed: {e}. Falling back to pre-defined script.")
             fallback = _get_fallback_script()
-            return fallback, fallback
+            return fallback, fallback, "The Heroic Sacrifice of Abhimanyu"
 
     def generate_script(self, topic: str, duration_sec: int = 60) -> list:
         # Legacy single-script method (keep for backward compatibility)
-        short, full = self.generate_dual_scripts(topic)
+        res = self.generate_dual_scripts(topic)
+        if len(res) == 3:
+            short, full, _ = res
+        else:
+            short, full = res
         return full if duration_sec > 60 else short
 
 

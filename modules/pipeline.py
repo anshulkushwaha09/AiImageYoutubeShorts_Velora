@@ -48,7 +48,12 @@ class ContentPipeline:
 
         # PART 1: SCRIPTING
         print("   [Brain] Generating dual-scripts (Short + Full)...")
-        short_script, full_script = self.brain.generate_dual_scripts(topic)
+        res = self.brain.generate_dual_scripts(topic)
+        if len(res) == 3:
+            short_script, full_script, actual_topic = res
+        else:
+            short_script, full_script = res
+            actual_topic = topic
         
         if not short_script or not full_script:
             print("   [Error] Script generation failed.")
@@ -71,7 +76,7 @@ class ContentPipeline:
         print(f"      - Short: {short_video}")
         print(f"      - Full: {full_video}")
         print(f"      - Thumbnail: {thumb_img}")
-        return run_path
+        return run_path, actual_topic
 
     async def process_video_type(self, script_data, output_dir, filename, run_uuid):
         """Helper to render a video for a list of script scenes."""

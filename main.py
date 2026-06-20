@@ -24,9 +24,11 @@ async def main():
     print(f"Target Topic: {topic}\n")
     
     try:
-        output_path = await pipeline.generate_full_pipeline(topic)
+        output_data = await pipeline.generate_full_pipeline(topic)
         
-        if output_path:
+        if output_data:
+            output_path, actual_topic = output_data if isinstance(output_data, tuple) else (output_data, topic)
+            
             print(f"\n[Success] ALL ASSETS GENERATED SUCCESSFULLY!")
             print(f"   Storage: {output_path}")
             print(f"   Contents: /short/video.mp4, /full/video.mp4, /full/thumbnail.jpg")
@@ -40,8 +42,8 @@ async def main():
                 thumbnail = os.path.join(output_path, "full", "thumbnail.jpg")
                 
                 if os.path.exists(full_video):
-                    title = f"{topic} | Untold Mystery Explained! 😲🔥 #shorts"
-                    desc = f"Dive deep into the shocking truth about {topic}! 🤯 Watch this cinematic AI-generated story to uncover ancient mysteries and hidden secrets.\n\n🔔 Subscribe for more mind-blowing mythological stories and facts!\n\n#Mythology #History #AI #SanatanDharma #AncientIndia #Trending #Shorts"
+                    title = f"{actual_topic} | Untold Mystery Explained! 😲🔥 #shorts"
+                    desc = f"Dive deep into the shocking truth about {actual_topic}! 🤯 Watch this cinematic AI-generated story to uncover ancient mysteries and hidden secrets.\n\n🔔 Subscribe for more mind-blowing mythological stories and facts!\n\n#Mythology #History #AI #SanatanDharma #AncientIndia #Trending #Shorts"
                     uploader.upload_video(full_video, thumbnail, title, desc)
                 else:
                     print("   [Upload Warning] Full video not found for upload.")
