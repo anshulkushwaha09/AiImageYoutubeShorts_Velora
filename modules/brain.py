@@ -58,7 +58,8 @@ def _call_gemini(prompt: str, retries: int = 3, wait: int = 20) -> str:
                             print(f"   --- Transient error on {model}. Waiting {wait}s... (attempt {attempt+1}/{retries})")
                             time.sleep(wait)
                         else:
-                            print(f"   [Warning] Quota exceeded on {model}. Trying next model...")
+                            print(f"   [Warning] Quota/Rate limit exceeded on {model}. Switching to next API key...")
+                            key_is_bad = True
                             break
                     else:
                         print(f"   [Warning] Unknown error: {err[:50]}. Skipping model...")
