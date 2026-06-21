@@ -45,13 +45,24 @@ class ThumbnailGenerator:
                 draw = ImageDraw.Draw(img)
                 
                 # Part 7 Rules: 2-3 words only, Bold font, Yellow/White text, Black outline
-                font_size = int(h * 0.15) # Dynamic sizing
-                try:
-                    font = ImageFont.truetype(self.font_path, font_size)
-                except:
-                    font = ImageFont.load_default()
-
                 text = text_overlay.upper()
+                max_text_width = int(w * 0.85)
+                font_size = int(h * 0.15) # Dynamic sizing start
+                
+                # Scale down font size until it fits within max_text_width
+                while font_size > 20:
+                    try:
+                        font = ImageFont.truetype(self.font_path, font_size)
+                    except:
+                        font = ImageFont.load_default()
+                        break
+                    
+                    bbox = draw.textbbox((0, 0), text, font=font)
+                    tw = bbox[2] - bbox[0]
+                    if tw <= max_text_width:
+                        break
+                    font_size -= 5
+                
                 bbox = draw.textbbox((0, 0), text, font=font)
                 tw, th = bbox[2] - bbox[0], bbox[3] - bbox[1]
                 

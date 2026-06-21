@@ -74,49 +74,49 @@ def _get_fallback_script():
     return [
         {
             "id": 1,
-            "narration": "कुरुक्षेत्र के युद्ध मैदान में एक सोलह साल का वीर अकेला खड़ा था—अभिमन्यु।",
+            "narration": "Kurukshetra ke yuddh maidan mein ek solah saal ka veer akela khada tha—Abhimanyu.",
             "english_caption": "THE YOUNG WARRIOR!",
             "image_prompt": "Epic cinematic realistic style. A teenage Indian warrior Abhimanyu, royal golden armor, blue dhoti, holding a massive golden bow, standing in the center of a chaotic battlefield Kurukshetra. Thousands of soldiers and chariots in background. high quality, ultra detailed, 4k, cinematic lighting, masterpiece, no abstract background, no plain colors"
         },
         {
             "id": 2,
-            "narration": "द्रोणाचार्य ने एक अभेद्य चक्रव्यूह बनाया था, जिसे भेदना नामुमकिन था।",
+            "narration": "Dronacharya ne ek abhedya Chakravyuha banaya tha, jise bhedna namumkin tha.",
             "english_caption": "THE IMPENETRABLE CIRCLE",
             "image_prompt": "Epic cinematic realistic style. A top-down bird's eye view of the Chakravyuha formation: millions of soldiers arranged in a massive complex spiral pattern on a dusty plain. In the center, a golden light. high quality, ultra detailed, 4k, cinematic lighting, masterpiece, no abstract background, no plain colors"
         },
         {
             "id": 3,
-            "narration": "अभिमन्यु ने अपनी मां के गर्भ में ही इसे तोड़ने का रहस्य सुना था।",
+            "narration": "Abhimanyu ne apni maa ke garbh mein hi ise todne ka rahasya suna tha.",
             "english_caption": "A MYSTERY BORN...",
             "image_prompt": "Epic cinematic realistic style. Close-up of a pregnant Indian queen Subhadra sitting on a carved balcony, moonlit night. Nearby, Arjuna is explaining battle tactics with animated hand gestures. Soft glowing lanterns. high quality, ultra detailed, 4k, cinematic lighting, masterpiece, no abstract background, no plain colors"
         },
         {
             "id": 4,
-            "narration": "बिना डरे, वह अपने रथ को लेकर दुश्मन की सेना के बीच कूद पड़ा।",
+            "narration": "Bina dare, woh apne rath ko lekar dushman ki sena ke beech kood pada.",
             "english_caption": "CHARGE INTO DARKNESS!",
             "image_prompt": "Epic cinematic realistic style. Low angle dynamic shot of Abhimanyu's golden chariot charging into a wall of enemy spears. Dust flying, horses galloping furiously, intense sunlight. high quality, ultra detailed, 4k, cinematic lighting, masterpiece, no abstract background, no plain colors"
         },
         {
             "id": 5,
-            "narration": "एक-एक करके उसने सात परतों को तोड़ दिया, लेकिन अंत में वह घिर गया।",
+            "narration": "Ek-ek karke usne saat paraton ko tod diya, lekin ant mein woh ghir gaya.",
             "english_caption": "TRAPPED IN THE CORE",
             "image_prompt": "Epic cinematic realistic style. Abhimanyu surrounded by seven powerful warriors (Maharathis) including Drona and Karna. He is holding a broken chariot wheel as a shield, standing on broken wood and arrows. low angle cinematic shot. high quality, ultra detailed, 4k, cinematic lighting, masterpiece, no abstract background, no plain colors"
         },
         {
             "id": 6,
-            "narration": "सात महारथियों ने मिलकर उस निहत्थे बालक पर वार किया।",
+            "narration": "Saat maharathiyon ne milkar us nihatthe baalak par vaar kiya.",
             "english_caption": "7 AGAINST 1",
             "image_prompt": "Epic cinematic realistic style. Dramatic silhouettes of seven warriors attacking a central figure under a dark bloody sky of Kurukshetra. Shafts of divine golden light piercing the dust. high quality, ultra detailed, 4k, cinematic lighting, masterpiece, no abstract background, no plain colors"
         },
         {
             "id": 7,
-            "narration": "उसका बलिदान आज भी वीरता की सबसे बड़ी मिसाल माना जाता है।",
+            "narration": "Uska balidan aaj bhi veerta ki sabse badi misaal maana jaata hai.",
             "english_caption": "IMMORTAL SACRIFICE",
             "image_prompt": "Epic cinematic realistic style. The spirit of a young warrior rising from the battlefield towards a glowing celestial portal in the clouds. Thousands of glowing arrows on the ground. high quality, ultra detailed, 4k, cinematic lighting, masterpiece, no abstract background, no plain colors"
         },
         {
             "id": 8,
-            "narration": "क्या आप अभिमन्यु की इस महान गाथा को जानते थे? सब्सक्राइब करें!",
+            "narration": "Kya aap Abhimanyu ki is mahaan gaatha ko jaante the? Subscribe karein!",
             "english_caption": "A HERO'S LEGEND!",
             "image_prompt": "Epic cinematic realistic style. A panoramic wide shot of the Kurukshetra dawn, golden sun rising over a field of broken weapons and historical remains. Cinematic lens flare. high quality, ultra detailed, 4k, cinematic lighting, masterpiece, no abstract background, no plain colors"
         }
@@ -130,6 +130,7 @@ class ContentBrain:
         Maintains a memory log to prevent repeats.
         """
         import os
+        import random
         log_file = "used_topics.txt"
         used_topics_text = ""
         
@@ -144,13 +145,37 @@ class ContentBrain:
             except Exception:
                 pass
 
+        sub_topics = [
+            "Advanced Vimanas and ancient flight technology described in Vaimanika Shastra",
+            "The mysteries of the Kailasa Temple and how it was carved top-down from a single rock",
+            "The curse of Gandhari on Lord Krishna and the end of the Yadava dynasty",
+            "The legendary floating stones of Ram Setu and ancient engineering",
+            "The mysterious 9 Unknown Men created by Emperor Ashoka",
+            "The advanced nuclear-like weapons of Kurukshetra like the Brahmashira Astra",
+            "The secret doors and underground vaults of Padmanabhaswamy Temple",
+            "The science of Sanatan Dharma: Vedic mathematics, astronomy, and ancient metallurgy",
+            "The untold story of Barbarik: The warrior who could end the Mahabharata in one second",
+            "The mystery of the Sun Temple of Konark and its magnetic chariot wheels",
+            "The lost city of Dwarka submerged under the Arabian Sea",
+            "The mysterious timeline and longevity of Mahavatar Babaji",
+            "The divine architecture of the Brihadeeswarar Temple's shadowless dome",
+            "The story of Sage Vishwamitra creating a parallel heaven (Trishanku Swarga)",
+            "The untold mystery of the King of Shambhala and Kalki's birth place",
+            "The cosmic dance of Shiva (Nataraja) matching modern particle physics concepts",
+            "The advanced medical science of Sushruta, the ancient father of plastic surgery",
+            "The science of sound and frequency behind Vedic chants and Mantras",
+            "The mystery of the Iron Pillar of Delhi which never rusts after 1600 years",
+            "The legendary flight of Hanuman to fetch the Sanjeevani herb and its medical science",
+            "The divine protective energy shields described in ancient Atharvaveda"
+        ]
+        chosen_concept = random.choice(sub_topics)
+
         prompt = f"""
         You are a YouTube Shorts strategist for a highly viral Indian channel focused on 
         "Untold Sanatan Dharma, Vedic Secrets, and Ancient Indian History Mysteries".
-        Pick ONE specific event, mystery, powerful weapon, or lost technology from the Ramayana, Mahabharata, Puranas, or Ancient Indian History.
         
-        Focus on things like: Advanced Vimanas, the Kailasa Temple mystery, untold stories of Lord Shiva, Ashwatthama's survival, curses of the Rishis, or lost Vedic science.
-
+        Generate ONE highly viral, specific topic title about: "{chosen_concept}"
+        
         {used_topics_text}
 
         Return ONLY the topic title. No explanation. No punctuation at the end.
@@ -200,28 +225,28 @@ class ContentBrain:
             "short": [
                 {{
                     "id": 1, 
-                    "narration": "Hinglish storytelling narration", 
+                    "narration": "Hinglish storytelling narration (Hindi language written ONLY in Latin/English alphabet, e.g. 'Kya aap jaante hain' - DO NOT use Devanagari/Hindi letters)", 
                     "english_caption": "English subtitle", 
                     "image_prompt": "Scene specific description added to base prompt. MUST include key artifacts like 'Golden Bow', 'Sudharshan Chakra', or 'Gada' if relevant to the scene.",
-                    "duration": 3.0,
+                    "duration": 2.5,
                     "type": "hook/build/twist/climax/cliffhanger"
                 }}
             ],
             "full": [
-                {{"id": 1, "narration": "Deep Hinglish narration", "english_caption": "English subtitle", "image_prompt": "cinematic prompt", "duration": 8.0}}
+                {{"id": 1, "narration": "Deep Hinglish narration (Hindi in Latin script)", "english_caption": "English subtitle", "image_prompt": "cinematic prompt", "duration": 6.0}}
             ]
         }}
 
-        SHORT RULES (YouTube Shorts ~60 seconds):
-        - Style: High-retention emotional Hinglish storytelling.
-        - Word Count: The TOTAL narration across all scenes must be EXACTLY 130 to 150 words (this guarantees a 60-second video).
-        - Scenes: EXACTLY 12 to 15 scenes. Each scene's narration MUST be very short (around 10-12 words). This forces the visuals to change every 4-5 seconds to keep the audience hooked.
+        SHORT RULES (YouTube Shorts ~50-60 seconds):
+        - Style: High-retention emotional Hinglish storytelling (Hindi language written strictly in English/Latin letters, e.g., 'Kya aap jaante hain'). Do NOT output Devanagari characters.
+        - Word Count: The TOTAL narration across all scenes must be around 110 to 130 words.
+        - Scenes: EXACTLY 12 to 15 scenes. Each scene's narration MUST be around 8 to 10 words. This is crucial so that the visuals change every 3 to 4 seconds, keeping the audience's eyes glued to the screen.
         - Structure: 
             1. HOOK (first 2 scenes): Start with a mind-blowing, impossible question or a shocking statement to immediately trap the viewer.
             2. BUILD (next 8-10 scenes): Fast-paced, high-tension mystery revealing the story piece by piece.
             3. TWIST (1 scene): A shocking revelation or "Did you know?" moment.
             4. CLIMAX (1 scene): The most epic and intense part of the story.
-            5. OUTRO (final scene): A strong call to action or cliffhanger question to drive comments.
+            5. OUTRO (final scene): MUST be a high-friction, comment-triggering call to action (e.g. "Write 'Mahadev' in the comments if you believe in his power", "Comment which weapon is stronger: Karna's arrow or Arjuna's bow", or "Write your answer in the comments to receive blessings"). This comment loop drives the algorithm.
         
         CHARACTER CONSISTENCY (CRITICAL):
         1. Generate ONE `character_base_prompt` that describes the main character (e.g., "Ancient Indian warrior, long white beard, glowing eyes, divine golden armor").
@@ -250,6 +275,70 @@ class ContentBrain:
             print(f"   [Brain Error] Dual script generation failed: {e}. Falling back to pre-defined script.")
             fallback = _get_fallback_script()
             return fallback, fallback, "The Heroic Sacrifice of Abhimanyu"
+
+    def generate_viral_metadata(self, topic: str, script_data: list = None):
+        """
+        Generates highly clickbait/viral titles, descriptions, and thumbnail hook text for YouTube.
+        Returns a dict: {"title": "...", "description": "...", "thumbnail_hook": "..."}
+        """
+        print(f"\n[Brain] Generating Viral Metadata for: {topic}...")
+        
+        script_text = ""
+        if script_data:
+            narrations = []
+            for scene in script_data:
+                narr = scene.get('narration', scene.get('text', scene.get('scene_text', '')))
+                if narr:
+                    narrations.append(f"- Scene {scene.get('id')}: {narr}")
+            script_text = "\nHere is the exact video script narration for context:\n" + "\n".join(narrations)
+            
+        prompt = f"""
+        You are a YouTube viral growth expert. Generate a highly clickable, emotional, curiosity-inducing YouTube Title, a search-optimized Description, and a 2-3 word high-impact THUMBNAIL Hook text for a video about: "{topic}"
+        {script_text}
+        
+        The video is an AI-generated, high-impact storytelling video about Indian mythology/ancient mysteries.
+
+        TITLE RULES:
+        1. Must be under 100 characters.
+        2. Must use curiosity gap, emotional hook, or a bold question (e.g. "The 5000-Year-Old Temple That Defies Physics! 😲", "Why Did Lord Shiva Curse His Own Son? 🤯").
+        3. Include 1-2 highly relevant emojis.
+        4. Must end with "#shorts" or "#shortsfeed" (in lowercase).
+
+        DESCRIPTION RULES:
+        1. Write a highly detailed description summarizing the specific story narrated in the script above. Outline the key mysteries and events.
+        2. Call to action asking users to subscribe and comment.
+        3. Add a section of relevant hashtags (e.g., #mythology #ancientindia #history #sanatandharma #mysteries).
+
+        THUMBNAIL HOOK RULES:
+        1. EXACTLY 2 to 3 words.
+        2. Must be highly dramatic, shocking, or mysterious in all-caps (e.g. "LOST TECH", "NEVER BORN", "SHIVAS WRATH", "BIG MYSTERY", "HIDDEN TRUTH").
+        3. Do NOT include emojis or punctuation.
+
+        Return EXACTLY this JSON structure:
+        {{
+            "title": "Generated Viral Title",
+            "description": "Generated Viral Description",
+            "thumbnail_hook": "Generated 2-3 word hook in all-caps"
+        }}
+
+        Return ONLY valid JSON.
+        """
+        try:
+            raw_text = _call_gemini(prompt)
+            clean_text = raw_text.strip().replace("```json", "").replace("```", "")
+            data = json.loads(clean_text)
+            return {
+                "title": data.get("title", f"{topic} | Untold Mystery Explained! 😲🔥 #shorts"),
+                "description": data.get("description", f"Dive deep into the shocking truth about {topic}! 🤯 Watch this cinematic AI-generated story to uncover ancient mysteries.\n\n#Mythology #History #AI #SanatanDharma #AncientIndia #Trending #Shorts"),
+                "thumbnail_hook": data.get("thumbnail_hook", "HIDDEN TRUTH")
+            }
+        except Exception as e:
+            print(f"   [Brain Error] Viral metadata generation failed: {e}. Using fallback.")
+            return {
+                "title": f"{topic} | Untold Mystery Explained! 😲🔥 #shorts",
+                "description": f"Dive deep into the shocking truth about {topic}! 🤯 Watch this cinematic AI-generated story to uncover ancient mysteries.\n\n#Mythology #History #AI #SanatanDharma #AncientIndia #Trending #Shorts",
+                "thumbnail_hook": "HIDDEN TRUTH"
+            }
 
     def generate_script(self, topic: str, duration_sec: int = 60) -> list:
         # Legacy single-script method (keep for backward compatibility)

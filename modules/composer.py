@@ -43,7 +43,62 @@ class Composer:
         os.makedirs(self.caption_dir, exist_ok=True)
 
         self.transitions = ["fade", "diagbr", "diagtl", "wipeleft", "slideup"]
+        self.whoosh_path = os.path.join(os.getcwd(), "assets", "sfx_whoosh.wav")
+        self.ensure_whoosh_sfx()
         self.cleanup_old_assets()
+
+    def ensure_whoosh_sfx(self):
+        """Generates a synthetic whoosh sound effect using numpy if it doesn't exist."""
+        if os.path.exists(self.whoosh_path):
+            return
+        
+        print("   [Composer] Synthesizing custom whoosh sound effect...")
+        try:
+            import wave
+            import numpy as np
+
+            sr = 44100
+            duration = 0.8
+            t = np.linspace(0, duration, int(sr * duration), endpoint=False)
+            
+            # White noise
+            noise = np.random.normal(0, 0.15, len(t))
+            
+            # Amplitude envelope: bell curve (sine wave squared)
+            envelope = np.sin(np.pi * t / duration) ** 2
+            
+            # Frequency sweep: low rumble (swept sine) + swept lowpass noise
+            f_start = 80
+            f_end = 350
+            freq = f_start + (f_end - f_start) * (t / duration)
+            phase = 2 * np.pi * np.cumsum(freq) / sr
+            rumble = np.sin(phase) * 0.3
+            
+            # Swept IIR filter
+            alpha_sweep = 0.98 - 0.15 * np.sin(np.pi * t / duration)
+            y = np.zeros_like(noise)
+            for i in range(1, len(noise)):
+                a = alpha_sweep[i]
+                y[i] = a * y[i-1] + (1 - a) * noise[i]
+                
+            signal = (y + rumble) * envelope
+            # Normalize
+            max_val = np.max(np.abs(signal))
+            if max_val > 0:
+                signal = signal / max_val * 0.5
+            
+            # Convert to 16-bit PCM
+            signal_pcm = (signal * 32767).astype(np.int16)
+            
+            # Write to WAV
+            with wave.open(self.whoosh_path, "wb") as w:
+                w.setnchannels(1)
+                w.setsampwidth(2)
+                w.setframerate(sr)
+                w.writeframes(signal_pcm.tobytes())
+            print(f"   [Composer Done] Synthesized custom whoosh SFX at: {self.whoosh_path}")
+        except Exception as e:
+            print(f"   [Composer Warning] Failed to synthesize whoosh SFX: {e}")
 
     def cleanup_old_assets(self):
         """Cleanup old video files to save space."""
@@ -101,76 +156,116 @@ class Composer:
                     return np.roll(np.roll(frame, dx, axis=1), dy, axis=0)
                 bg_clip = bg_clip.transform(camera_shake)
 
-            # --- PART 8 & 9: NETFLIX-STYLE ENGLISH CAPTIONS ---
+            # --- PART 8 & 9: HIGH-RETENTION WORD-BY-WORD ACTIVE CAPTIONS ---
             caption_clips = []
             if english_caption:
                 words = english_caption.split()
-                chunk_size = 4
-                chunks = [" ".join(words[i:i+chunk_size]) for i in range(0, len(words), chunk_size)]
-                num_chunks = len(chunks)
+                num_words = len(words)
                 
-                if num_chunks > 0:
-                    chunk_duration = duration / num_chunks
+                if num_words > 0:
                     from PIL import Image, ImageDraw, ImageFont
                     from moviepy import ImageClip
                     
-                    for i, chunk_text in enumerate(chunks):
-                        try:
-                            font = ImageFont.truetype(FONT_PATH, 55)
-                        except:
-                            font = ImageFont.load_default()
-                            
-                        words = chunk_text.split()
-                        lines = []
-                        current_line = []
-                        dummy_img = Image.new('RGBA', (1, 1))
-                        draw = ImageDraw.Draw(dummy_img)
+                    try:
+                        font_reg = ImageFont.truetype(FONT_PATH, 52)
+                        font_act = ImageFont.truetype(FONT_PATH, 60)
+                    except:
+                        font_reg = ImageFont.load_default()
+                        font_act = ImageFont.load_default()
                         
-                        for word in words:
-                            current_line.append(word)
-                            test_line = " ".join(current_line)
-                            bbox = draw.textbbox((0, 0), test_line, font=font)
-                            if bbox[2] - bbox[0] > int(VIDEO_W * 0.8) and len(current_line) > 1:
-                                current_line.pop()
-                                lines.append(current_line)
-                                current_line = [word]
-                        if current_line:
+                    # Estimate space width
+                    dummy_img = Image.new('RGBA', (1, 1))
+                    draw = ImageDraw.Draw(dummy_img)
+                    space_bbox = draw.textbbox((0, 0), " ", font=font_reg)
+                    space_w = space_bbox[2] - space_bbox[0] if (space_bbox[2] - space_bbox[0]) > 0 else 15
+                    
+                    # 1. Wrap words into lines while tracking original index
+                    max_width = int(VIDEO_W * 0.85)
+                    lines = []
+                    current_line = []
+                    current_width = 0
+                    
+                    for idx, word in enumerate(words):
+                        # Measure word width
+                        w_bbox = draw.textbbox((0, 0), word, font=font_reg)
+                        word_w = w_bbox[2] - w_bbox[0]
+                        
+                        if current_width + word_w > max_width and current_line:
                             lines.append(current_line)
+                            current_line = []
+                            current_width = 0
                             
+                        current_line.append((word, idx, word_w))
+                        current_width += word_w + space_w
+                        
+                    if current_line:
+                        lines.append(current_line)
+                        
+                    # Calculate word durations (even distribution over scene duration)
+                    word_duration = duration / num_words
+                    
+                    # 2. Render a frame for each word index
+                    for active_idx in range(num_words):
+                        # Calculate layout heights
                         line_heights = []
                         line_widths = []
                         for line in lines:
-                            bbox = draw.textbbox((0, 0), " ".join(line), font=font)
-                            line_widths.append(bbox[2] - bbox[0])
-                            line_heights.append(bbox[3] - bbox[1] + 15)
+                            # Width is sum of word widths + spaces
+                            l_width = sum(w[2] for w in line) + space_w * (len(line) - 1)
+                            # Height is max bbox height
+                            l_heights = []
+                            for w, idx, _ in line:
+                                font = font_act if idx == active_idx else font_reg
+                                bbox = draw.textbbox((0, 0), w, font=font)
+                                l_heights.append(bbox[3] - bbox[1])
+                            l_height = max(l_heights) + 15 if l_heights else 60
+                            line_widths.append(l_width)
+                            line_heights.append(l_height)
                             
                         total_height = sum(line_heights) + 20
-                        width = int(VIDEO_W * 0.8)
+                        canvas_width = int(VIDEO_W * 0.9)
                         
-                        img = Image.new('RGBA', (width, total_height), (0, 0, 0, 0))
-                        draw = ImageDraw.Draw(img)
+                        img = Image.new('RGBA', (canvas_width, total_height), (0, 0, 0, 0))
+                        draw_frame = ImageDraw.Draw(img)
+                        
                         y = 10
-                        for idx, line in enumerate(lines):
-                            x = (width - line_widths[idx]) // 2
-                            for word in line:
-                                clean_word = ''.join(c for c in word if c.isalnum())
-                                color = "yellow" if len(clean_word) > 4 else "white"
+                        for l_idx, line in enumerate(lines):
+                            # Center the line on canvas
+                            line_w = line_widths[l_idx]
+                            x = (canvas_width - line_w) // 2
+                            
+                            for w, idx, _ in line:
+                                is_active = (idx == active_idx)
+                                font = font_act if is_active else font_reg
+                                color = "#FFD700" if is_active else "#FFFFFF" # Golden active, White regular
                                 
+                                # Measure exact word size with its specific font
+                                bbox = draw_frame.textbbox((0, 0), w, font=font)
+                                w_w = bbox[2] - bbox[0]
+                                
+                                # Draw Outline/Stroke (3px)
                                 stroke_width = 3
                                 for dx in range(-stroke_width, stroke_width+1):
                                     for dy in range(-stroke_width, stroke_width+1):
                                         if dx*dx + dy*dy <= stroke_width*stroke_width:
-                                            draw.text((x+dx, y+dy), word, font=font, fill="black")
+                                            draw_frame.text((x+dx, y+dy), w, font=font, fill="black")
                                             
-                                draw.text((x, y), word, font=font, fill=color)
-                                bbox = draw.textbbox((0, 0), word + " ", font=font)
-                                x += (bbox[2] - bbox[0])
-                            y += line_heights[idx]
+                                # Draw Main Text
+                                draw_frame.text((x, y), w, font=font, fill=color)
+                                x += w_w + space_w
+                                
+                            y += line_heights[l_idx]
                             
+                        # Save frame
                         img_path = os.path.join(self.temp_dir, f"cap_{uuid.uuid4().hex[:8]}.png")
                         img.save(img_path)
                         
-                        txt = ImageClip(img_path).with_start(i * chunk_duration).with_duration(chunk_duration)
+                        # Create moviepy clip
+                        start_time = active_idx * word_duration
+                        # Ensure last clip goes to the exact end of scene to prevent black screen
+                        clip_dur = word_duration if active_idx < num_words - 1 else (duration - start_time)
+                        
+                        txt = ImageClip(img_path).with_start(start_time).with_duration(clip_dur)
                         txt = txt.with_position(("center", int(VIDEO_H * 0.70)))
                         caption_clips.append(txt)
             
@@ -205,19 +300,45 @@ class Composer:
         raw_clip = self.image_to_3d_clip(image_path, depth_path, word_offsets, duration, output_path, english_caption=eng_cap, scene_type=scene_type)
         if not raw_clip: return None
 
-        # Add Audio
+        # Add Audio & SFX Whoosh at scene transitions
         final_mux_path = output_path.replace(".mp4", "_final.mp4")
         try:
             if audio_path and os.path.exists(audio_path):
-                cmd = ["ffmpeg", "-y", "-i", output_path, "-i", audio_path, "-c:v", "copy", "-c:a", "aac", "-shortest", final_mux_path]
+                if scene_id > 1 and os.path.exists(self.whoosh_path):
+                    cmd = [
+                        "ffmpeg", "-y",
+                        "-i", output_path,
+                        "-i", audio_path,
+                        "-i", self.whoosh_path,
+                        "-filter_complex", "[1:a]volume=1.0[a1];[2:a]volume=0.30[a2];[a1][a2]amix=inputs=2:duration=first",
+                        "-c:v", "copy",
+                        "-c:a", "aac",
+                        "-shortest",
+                        final_mux_path
+                    ]
+                else:
+                    cmd = ["ffmpeg", "-y", "-i", output_path, "-i", audio_path, "-c:v", "copy", "-c:a", "aac", "-shortest", final_mux_path]
             else:
-                cmd = ["ffmpeg", "-y", "-i", output_path, "-f", "lavfi", "-i", "anullsrc=channel_layout=mono:sample_rate=44100", "-c:v", "copy", "-c:a", "aac", "-t", str(duration), final_mux_path]
+                if scene_id > 1 and os.path.exists(self.whoosh_path):
+                    cmd = [
+                        "ffmpeg", "-y",
+                        "-i", output_path,
+                        "-i", self.whoosh_path,
+                        "-c:v", "copy",
+                        "-c:a", "aac",
+                        "-shortest",
+                        final_mux_path
+                    ]
+                else:
+                    cmd = ["ffmpeg", "-y", "-i", output_path, "-f", "lavfi", "-i", "anullsrc=channel_layout=mono:sample_rate=44100", "-c:v", "copy", "-c:a", "aac", "-t", str(duration), final_mux_path]
+            
             subprocess.run(cmd, capture_output=True)
             if os.path.exists(final_mux_path):
                 os.remove(output_path)
                 os.rename(final_mux_path, output_path)
                 return output_path
-        except: pass
+        except Exception as e:
+            print(f"   [Audio Mux Warning] Audio mux failed for scene {scene_id}: {e}")
         return output_path
 
     def render_all_scenes(self, script_data: list, images: dict, depths: dict = None) -> list:
@@ -245,28 +366,72 @@ class Composer:
 
         if not video_paths: return None
 
-        # Stability Strategy: If more than 10 clips, skip complex transitions to save memory
+        # Stability Strategy: If more than 10 clips, transcode via MPEG-2 TS for stability and speed
         if len(video_paths) > 10:
-            print(f"   [Stability] Using Concat Demuxer for {len(video_paths)} clips (Memory-Safe).")
-            concat_list_path = os.path.join(self.temp_dir, f"concat_list_{uuid.uuid4().hex[:8]}.txt")
+            print(f"   [Stability] Using TS Transcode Concat for {len(video_paths)} clips (Memory-Safe).")
+            ts_paths = []
             try:
-                with open(concat_list_path, "w", encoding="utf-8") as f:
-                    for p in video_paths:
-                        # Normalize path for FFmpeg concat demuxer (requires straight slashes or escaped)
-                        p_abs = os.path.abspath(p).replace("\\", "/")
-                        f.write(f"file '{p_abs}'\n")
+                # 1. Convert all clips to TS
+                for p in video_paths:
+                    ts_path = p.replace(".mp4", ".ts")
+                    ts_paths.append(ts_path)
+                    cmd = [
+                        "ffmpeg", "-y", "-i", p,
+                        "-c", "copy",
+                        "-bsf:v", "h264_mp4toannexb",
+                        "-f", "mpegts",
+                        ts_path
+                    ]
+                    subprocess.run(cmd, capture_output=True)
                 
-                cmd = [
-                    "ffmpeg", "-y", "-f", "concat", "-safe", "0",
-                    "-i", concat_list_path,
-                    "-c", "copy", # Fast and zero-loss
-                    output_path
+                # 2. Concat demuxer with re-encoding to temp file
+                concat_str = "concat:" + "|".join(ts_paths)
+                temp_stitched = os.path.join(self.temp_dir, f"temp_ts_stitched_{uuid.uuid4().hex[:8]}.mp4")
+                
+                cmd_concat = [
+                    "ffmpeg", "-y",
+                    "-i", concat_str,
+                    "-c:v", "libx264",
+                    "-c:a", "aac",
+                    "-pix_fmt", "yuv420p",
+                    "-preset", "ultrafast",
+                    temp_stitched
                 ]
-                subprocess.run(cmd, capture_output=True)
-                if os.path.exists(concat_list_path): os.remove(concat_list_path)
+                subprocess.run(cmd_concat, capture_output=True)
+                
+                # 3. Clean up TS files immediately
+                for ts in ts_paths:
+                    if os.path.exists(ts): os.remove(ts)
+                
+                # 4. Check for background music and mix
+                music_path = os.path.join(os.getcwd(), "assets", "music.mp3")
+                if os.path.exists(music_path) and os.path.exists(temp_stitched):
+                    print("   [Audio] Mixing background music with sidechain ducking...")
+                    cmd_mix = [
+                        "ffmpeg", "-y",
+                        "-i", temp_stitched,
+                        "-stream_loop", "-1", "-i", music_path,
+                        "-filter_complex", "[0:a]volume=1.0[a1];[1:a]volume=0.12[a2];[a1][a2]amix=inputs=2:duration=first",
+                        "-c:v", "copy",
+                        "-c:a", "aac",
+                        "-shortest",
+                        output_path
+                    ]
+                    subprocess.run(cmd_mix, capture_output=True)
+                    if os.path.exists(temp_stitched): os.remove(temp_stitched)
+                else:
+                    if os.path.exists(temp_stitched):
+                        if os.path.exists(output_path): os.remove(output_path)
+                        os.rename(temp_stitched, output_path)
+                
                 return output_path
             except Exception as e:
-                print(f"   [Concat Error] Demuxer failed: {e}")
+                print(f"   [Concat Error] TS Transcode Concat failed: {e}")
+                # Clean up any leftover TS files
+                for ts in ts_paths:
+                    if os.path.exists(ts):
+                        try: os.remove(ts)
+                        except: pass
                 return None
 
         # Original transition logic for Shorts (<= 10 clips)
@@ -291,15 +456,23 @@ class Composer:
                 a_stream = ffmpeg.filter([a_stream, next_clip.audio], "acrossfade", d=trans_dur)
                 current_dur = (current_dur + next_dur) - trans_dur
 
-            # --- PART 7: BACKGROUND MUSIC SYNC ---
+            # --- PART 7: BACKGROUND MUSIC SYNC WITH SIDECHAIN DUCKING ---
             # Attempt to add background music if it exists
             music_path = os.path.join(os.getcwd(), "assets", "music.mp3")
             if os.path.exists(music_path):
-                print("   [Audio] Mixing background music...")
+                print("   [Audio] Mixing background music with sidechain ducking...")
                 music_input = ffmpeg.input(music_path, stream_loop=-1, t=current_dur)
-                # Music Volume: Sync logic (Part 7) - Ducking manually or fixed lower volume
-                music_audio = music_input.audio.filter("volume", 0.15) 
-                a_stream = ffmpeg.filter([a_stream.filter("volume", 1.0), music_audio], "amix", duration="first")
+                # Base music volume is slightly higher, it gets compressed when narration plays
+                music_audio = music_input.audio.filter("volume", 0.22) 
+                
+                try:
+                    # Apply sidechaincompress: trigger on a_stream (narration) to duck music_audio
+                    compressed_music = ffmpeg.filter([music_audio, a_stream], "sidechaincompress", threshold="-25dB", ratio=5, attack=50, release=250)
+                    a_stream = ffmpeg.filter([a_stream, compressed_music], "amix", duration="first")
+                except Exception as e:
+                    print(f"   [Audio Sync Warning] Sidechain compression failed: {e}. Falling back to standard mix.")
+                    music_audio_fallback = music_input.audio.filter("volume", 0.12)
+                    a_stream = ffmpeg.filter([a_stream, music_audio_fallback], "amix", duration="first")
 
             (
                 ffmpeg
@@ -312,6 +485,12 @@ class Composer:
                 .run(overwrite_output=True, quiet=True)
             )
             return output_path
+        except ffmpeg.Error as e:
+            print(f"   [Stitch Error] xfade transition failed: {e}")
+            if e.stderr:
+                print("FFmpeg Stderr:")
+                print(e.stderr.decode('utf-8', errors='replace'))
+            return None
         except Exception as e:
             print(f"   [Stitch Error] xfade transition failed: {e}")
             return None

@@ -27,7 +27,7 @@ async def main():
         output_data = await pipeline.generate_full_pipeline(topic)
         
         if output_data:
-            output_path, actual_topic = output_data if isinstance(output_data, tuple) else (output_data, topic)
+            output_path, actual_topic, metadata = output_data
             
             print(f"\n[Success] ALL ASSETS GENERATED SUCCESSFULLY!")
             print(f"   Storage: {output_path}")
@@ -35,18 +35,23 @@ async def main():
             
             if args.upload:
                 from modules.youtube_uploader import YouTubeUploader
+                
                 uploader = YouTubeUploader()
                 
-                # We upload the full video (since short generation is currently skipped in pipeline)
-                full_video = os.path.join(output_path, "full", "full.mp4")
-                thumbnail = os.path.join(output_path, "full", "thumbnail.jpg")
+                # We upload the short video (since full generation is now skipped)
+                short_video = os.path.join(output_path, "short", "short.mp4")
+                thumbnail = os.path.join(output_path, "short", "thumbnail.jpg")
                 
-                if os.path.exists(full_video):
-                    title = f"{actual_topic} | Untold Mystery Explained! 😲🔥 #shorts"
-                    desc = f"Dive deep into the shocking truth about {actual_topic}! 🤯 Watch this cinematic AI-generated story to uncover ancient mysteries and hidden secrets.\n\n🔔 Subscribe for more mind-blowing mythological stories and facts!\n\n#Mythology #History #AI #SanatanDharma #AncientIndia #Trending #Shorts"
-                    uploader.upload_video(full_video, thumbnail, title, desc)
+                if os.path.exists(short_video):
+                    title = metadata.get("title")
+                    desc = metadata.get("description")
+                    
+                    print(f"\n   [Upload] Using AI-Generated Title: {title}")
+                    print(f"   [Upload] Using AI-Generated Description:\n{desc}\n")
+                    
+                    uploader.upload_video(short_video, thumbnail, title, desc)
                 else:
-                    print("   [Upload Warning] Full video not found for upload.")
+                    print("   [Upload Warning] Short video not found for upload.")
                     
         else:
             print("\n[Error] Pipeline failed to complete all steps.")

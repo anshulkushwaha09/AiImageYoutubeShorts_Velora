@@ -36,6 +36,18 @@ class ContentPipeline:
         4. Compose Final Video Clips
         5. Generate cinematic Thumbnail with text
         """
+        # Clean up any existing video_* folders to save disk space
+        print("\n[Cleanup] Cleaning up all previous output run directories...")
+        if os.path.exists(self.base_output_dir):
+            for item in os.listdir(self.base_output_dir):
+                item_path = os.path.join(self.base_output_dir, item)
+                if os.path.isdir(item_path) and item.startswith("video_"):
+                    print(f"   [Cleanup] Removing previous run folder: {item}")
+                    try:
+                        shutil.rmtree(item_path)
+                    except Exception as e:
+                        print(f"   [Cleanup Warning] Could not remove {item}: {e}")
+
         run_id = f"video_{uuid.uuid4().hex[:8]}"
         run_path = os.path.join(self.base_output_dir, run_id)
         short_path = os.path.join(run_path, "short")
@@ -60,23 +72,24 @@ class ContentPipeline:
             return
 
         # PART 2 & 3: SHORT GENERATION
-        print("   [1/3] Skipping Short Video...")
-        # short_video = await self.process_video_type(short_script, short_path, "short.mp4", run_id)
-        short_video = "skipped"
+        print("   [1/3] Generating Short Video (50-60 sec)...")
+        short_video = await self.process_video_type(short_script, short_path, "short.mp4", run_id)
         
         # PART 4 & 5: FULL VIDEO GENERATION
-        print("   [2/3] Generating Full Video (3-4 min)...")
-        full_video = await self.process_video_type(full_script, full_path, "full.mp4", run_id)
+        print("   [2/3] Skipping Full Video...")
+        full_video = "skipped"
         
         # PART 7: THUMBNAIL
         print("   [3/3] Generating Cinematic Thumbnail...")
-        thumb_img = self.thumbnail_gen.generate_thumbnail(topic, "BIGGEST MISTAKE", os.path.join(full_path, "thumbnail.jpg"))
+        metadata = self.brain.generate_viral_metadata(actual_topic, short_script)
+        hook_text = metadata.get("thumbnail_hook", "HIDDEN TRUTH")
+        thumb_img = self.thumbnail_gen.generate_thumbnail(topic, hook_text, os.path.join(short_path, "thumbnail.jpg"))
 
         print(f"\n[PIPELINE] COMPLETE!")
         print(f"      - Short: {short_video}")
         print(f"      - Full: {full_video}")
         print(f"      - Thumbnail: {thumb_img}")
-        return run_path, actual_topic
+        return run_path, actual_topic, metadata
 
     async def process_video_type(self, script_data, output_dir, filename, run_uuid):
         """Helper to render a video for a list of script scenes."""
@@ -123,6 +136,6 @@ class ContentPipeline:
             if os.path.exists(target): os.remove(target)
             # Ensure folder exists
             os.makedirs(output_dir, exist_ok=True)
-            shutil.copy(final_video, target)
+            shutil.move(final_video, target)
             return target
         return None

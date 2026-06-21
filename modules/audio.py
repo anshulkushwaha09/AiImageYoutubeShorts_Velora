@@ -19,8 +19,8 @@ class AudioEngine:
         
         for attempt in range(retries):
             try:
-                # Phase 26: 1.20x speed for professional storytelling (+20%)
-                communicate = edge_tts.Communicate(text, self.voice, rate="+20%")
+                # Phase 26: 1.22x speed for professional storytelling (+22%)
+                communicate = edge_tts.Communicate(text, self.voice, rate="+22%")
                 
                 # We use stream() to catch WordBoundary events
                 with open(output_path, "wb") as f:
