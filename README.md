@@ -10,7 +10,7 @@ Welcome to the **AI-Youtube-Shorts-Generator**. This application provides infini
 
 Here is how you can set up and run the AI-Youtube-Shorts-Generator on your computer:
 
-### 🖥️ System Requirements
+### 🖥️ System Requirement
 
 Before you download the application, please ensure that your system meets the following requirements:
 
